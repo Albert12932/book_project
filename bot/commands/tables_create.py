@@ -1,6 +1,7 @@
 from engine import *
 import os
 from .get_info import get_books
+from .get_books import get_books_disk, get_book_link
 
  # Создает таблицу, если ее не cуществует
 def create_tables() -> None:
@@ -49,12 +50,10 @@ def create_tables() -> None:
 
 # Итерируемся по списку файлов
 async def update_books():
-    for file_name in os.listdir("C:/Users/shoma/OneDrive/Документы/project_books"):
-        # Проверяем, что расширение файла - pdf
-        if file_name in await get_books() or not file_name.endswith(".pdf"):
+    for book_name in get_books_disk():
+        if book_name in await get_books() or not book_name.endswith(".pdf"):
             continue
-        print('new_book')
-        cur.execute(f"select name from books where name = '{file_name}'")
+        cur.execute(f"select name from books where name = '{book_name}'")
         if not cur.fetchone():
-            cur.execute(f"insert into books (name, holder, link) values ('{file_name}', 'E', 'C:/Users/shoma/OneDrive/Документы/project_books/{file_name}')")
+            cur.execute(f"insert into books (name, holder, link) values ('{book_name}', 'E', '{get_book_link(book_name)}')")
             conn.commit()

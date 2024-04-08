@@ -19,9 +19,9 @@ async def books_show_list(message: types.Message):
     cur.execute('SELECT book_id from books')
     books_id = cur.fetchall()
     list_books = []
-    for id in range(len(books_id)):
+    for id in range(1, len(books_id)+1):
         emoji = ['✅', '❌', '🌐']
-        cur.execute(f"select holder from books where book_id={books_id[id][0]}")
+        cur.execute(f"select holder from books where book_id={books_id[id-1][0]}")
         holder_status = cur.fetchone()[0]
         if holder_status == '0':
             emoji = emoji[0]
@@ -29,9 +29,9 @@ async def books_show_list(message: types.Message):
             emoji = emoji[2]
         else:
             emoji = emoji[1]
-        list_books.append(f'{id}. {await get_book_name(books_id[id][0])} {emoji}')
-        buttons.button(text=str(id), callback_data=EditBookCallbackData(command='show_book', book_id=str(books_id[id][0]), user_id=f'{message.from_user.id}', group_name=''))
-    text_books = '\n\n'.join(list_books)
+        list_books.append(f'{id}. {await get_book_name(books_id[id-1][0])} {emoji}')
+        buttons.button(text=str(id), callback_data=EditBookCallbackData(command='show_book', book_id=str(books_id[id-1][0]), user_id=f'{message.from_user.id}', group_name=''))
+    text_books = '\n'.join(list_books)
     await message.answer(f'{text_books}')
     await message.answer('Книги', reply_markup=buttons.as_markup(resize_keyboard=True))
     await log_add(message.from_user.id, 'Книги списком', datetime.datetime.now(), f"user_id = {message.from_user.id}")
@@ -71,8 +71,7 @@ async def book_info(call: types.CallbackQuery, callback_data: EditBookCallbackDa
 async def download_book(call: types.callback_query, callback_data: EditBookCallbackData):
     cur.execute(f"select link from books where name='{await get_book_name(callback_data.book_id)}'")
     link = cur.fetchone()[0]
-    book_file = FSInputFile(link)
-    await call.message.answer_document(book_file)
+    await call.message.answer(link)
     await log_add(callback_data.user_id, 'Скачать книгу', datetime.datetime.now(), f"user_id = {callback_data.user_id}; book = {await get_book_name(callback_data.book_id)}")
 
 async def ask_tag_search(message: types.Message, state: FSMContext):

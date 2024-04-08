@@ -8,6 +8,7 @@ from .callback_datafactory import EditBookCallbackData
 from .get_info import log_add, get_book_name, get_id_by_surname
 from .show_books import book_info
 import datetime
+from .get_books import delete_book_disk
 
 
 edit_books_router = Router()
@@ -81,6 +82,19 @@ async def set_tag(message: types.Message, state: FSMContext):
     data = await state.get_data()
     book_id = data['book_id'][2]
     text = message.text.replace(' ', '').replace('\n', '')
+    
+    cur.execute(f"select book_tags from books where book_id = {book_id}")
+    try:
+        for tag in cur.fetchone()[0].split('#')[1:]:
+            tag = tag.lower()
+            cur.execute(f"select books from tags where text='{tag}'")
+            books_id = cur.fetchone()[0].split(';')
+            books_id.remove(book_id)
+            books_id = ';'.join(books_id)
+            cur.execute(f"update tags set books = '{books_id}' where text = '{tag}'")
+            conn.commit()
+    except AttributeError:
+        print('Нет тегов')
     cur.execute(f"update books set book_tags = '{text}' where book_id = {book_id}")
     conn.commit()
     cur.execute(f"select text from tags")
@@ -96,6 +110,7 @@ async def set_tag(message: types.Message, state: FSMContext):
     await message.answer(f'Теги успешно установлены')
     await state.clear()
     await log_add(message.from_user.id, 'Установить теги', datetime.datetime.now(), f'book = {await get_book_name(book_id)};tags = {text.lower()}')
+    cur.execute(f"delete from tags where books = ''")
     conn.commit()
 
 async def get_tags(call: types.CallbackQuery, callback_data: EditBookCallbackData):
@@ -116,7 +131,10 @@ async def ask_for_delete_book(call: types.CallbackQuery, callback_data: EditBook
     await call.message.answer(f'Вы уверены, что хотите удалить книгу <{await get_book_name(callback_data.book_id)}>', reply_markup=del_button.as_markup())
 
 async def delete_book(call: types.CallbackQuery, callback_data: EditBookCallbackData):
-    await call.message.answer(f'Книга <{callback_data.book_id}> успешно удалена')
+    book_name = await get_book_name(callback_data.book_id)
+    print(book_name, callback_data.book_id)
+    delete_book_disk(book_name)
+    await call.message.answer(f'Книга <{await get_book_name(callback_data.book_id)}> успешно удалена')
     await log_add(call.message.from_user.id, 'Удалить книгу', datetime.datetime.now(), f'book = {await get_book_name(callback_data.book_id)}')
     cur.execute(f'delete from books where book_id = {callback_data.book_id}')
     conn.commit()

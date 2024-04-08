@@ -29,9 +29,6 @@ async def phys_book_add(message: types.Message, state: FSMContext):
     await state.clear()
     await log_add(str(message.from_user.id), 'Добавить физ. книгу', datetime.datetime.now(), f'{message.text}')
 
-# async def net_book_file_wait(message: types.Message, state: FSMContext): #TODO
-#     await message.answer('Отправьте файл книги, которую нужно добавить') 
-#     await state.set_state(add_book.file_download)
 
 # @add_book_router.message(add_book.file_download)
 # async def download_file(message: types.Message, state: FSMContext, bot: Bot):

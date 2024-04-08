@@ -2,6 +2,7 @@ from aiogram import types
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, KeyboardButton
 from .get_info import admin
 from bot.commands.profile import new_user
+from .tables_create import update_books
 
 
  # Создает меню
@@ -17,4 +18,5 @@ async def start(message: types.Message) -> None:
         # menu_builder.add(KeyboardButton(text="📁Добавить электр. книгу")) # TODO
     else: print('no admin', message.from_user.id)
     await new_user(message)
+    await update_books()
     await message.answer('🔮Главное меню', reply_markup=menu_builder.as_markup(), resize=True)
