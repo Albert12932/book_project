@@ -34,7 +34,7 @@ async def books_show_list(message: types.Message):
     text_books = '\n'.join(list_books)
     await message.answer(f'{text_books}')
     await message.answer('Книги', reply_markup=buttons.as_markup(resize_keyboard=True))
-    await log_add(message.from_user.id, 'Книги списком', datetime.datetime.now(), f"user_id = {message.from_user.id}")
+    await log_add(message.from_user.id, 'Книги списком', datetime.datetime.now())
 
 # даёт информацию о книге и позволяет изменить хранилище и держателя админу
 async def book_info(call: types.CallbackQuery, callback_data: EditBookCallbackData):
@@ -72,7 +72,7 @@ async def download_book(call: types.callback_query, callback_data: EditBookCallb
     cur.execute(f"select link from books where name='{await get_book_name(callback_data.book_id)}'")
     link = cur.fetchone()[0]
     await call.message.answer(link)
-    await log_add(callback_data.user_id, 'Скачать книгу', datetime.datetime.now(), f"user_id = {callback_data.user_id}; book = {await get_book_name(callback_data.book_id)}")
+    await log_add(callback_data.user_id, 'Скачать книгу', datetime.datetime.now(), f"book = {await get_book_name(callback_data.book_id)}")
 
 async def ask_tag_search(message: types.Message, state: FSMContext):
     await message.answer('Введите тег, по которому хотите найти книгу')
@@ -97,13 +97,13 @@ async def choose_tags(message: types.Message, state: FSMContext):
     if len(text_tags) == 0: 
         await message.answer(f'Тег не найден')
         await state.clear()
-        await log_add(message.from_user.id, 'Поиск по тегу', datetime.datetime.now(), f"user_id = {message.from_user.id}; Нет тегов. tag = {search_tag}")
+        await log_add(message.from_user.id, 'Поиск по тегу', datetime.datetime.now(), f"No tags")
         return
     await message.answer(f'{text_tags}')
     await message.answer('Выберите тег из списка', reply_markup=buttons.as_markup(resize_keyboard=True))
     await state.clear()
     text_tags = text_tags.replace('\n', ' ')
-    await log_add(message.from_user.id, 'Поиск по тегу', datetime.datetime.now(), f"user_id = {message.from_user.id}; tag = {search_tag}; founded_tags = {text_tags}")
+    await log_add(message.from_user.id, 'Поиск по тегу', datetime.datetime.now(), f"tag = {search_tag}; founded_tags = {text_tags}")
 
 async def show_books_tags(call: types.CallbackQuery, callback_data: EditBookCallbackData):
     buttons = InlineKeyboardBuilder()

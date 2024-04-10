@@ -110,11 +110,11 @@ async def get_group_by_book(book_id):
         return ' '
 
 # Добавляет запись в логи
-async def log_add(user_id, command, date_time, args):
+async def log_add(user_id, command, date_time, args=''):
     cur.execute(f"select user_id, surname, name, group_name, username from people where user_id = '{user_id}'")
     try:
         info = '_'.join([x for x in cur.fetchall()[0]])
     except IndexError:
         info = 'None'
-    cur.execute(f"insert into logs (user_id, command, date_time, args) values ('{info}', '{command}', '{date_time}', '{args}')")
+    cur.execute(f"insert into logs (user_id, command, date_time, args) values ('{user_id}', '{command}', '{date_time}', '{args}')")
     conn.commit()  #TODO

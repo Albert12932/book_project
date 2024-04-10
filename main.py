@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from config import TOKEN
+from config import *
 from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand
 from bot.commands.__init__ import register_user_commands
@@ -11,6 +11,7 @@ from bot.commands.add_book import add_book_router
 from bot.commands.profile import add_info_router
 from bot.commands.show_books import show_books_router
 # Регистрация бота, диспатчера, роутеров
+
 async def main() -> None:
 
     logging.basicConfig(level=logging.DEBUG)
